@@ -3,43 +3,37 @@ import CardList from "../Components/CardList";
 import SearchBox from "../Components/SearchBox";
 import "./App.css";
 import Scroll from "../Components/Scroll";
-import { setSearchField } from "../actions";
+import { setSearchField, requestRobots } from "../actions";
 import { connect } from "react-redux";
 
 const mapStateToProps = (state) => {
   return {
-    searchField: state.searchField,
+    searchField: state.searchRobots.searchField,
+    Robots: state.requestRobots.robots,
+    isPending: state.requestRobots.isPending,
+    error: state.requestRobots.error,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
     onSearchChange: (event) => dispatch(setSearchField(event.target.value)),
+    onRequestRobots: () => dispatch(requestRobots()),
   };
 };
 
 class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      Robots: [],
-    };
-  }
-
   componentDidMount() {
-    fetch("https://jsonplaceholder.typicode.com/users")
-      .then((response) => response.json())
-      .then((users) => this.setState({ Robots: users }));
+    this.props.onRequestRobots();
   }
 
   render() {
-    const { Robots } = this.state;
-    const { searchField, onSearchChange } = this.props;
+    const { searchField, onSearchChange, Robots, isPending } = this.props;
     const filterRobots = Robots.filter((Robot) => {
       return Robot.name.toLowerCase().includes(searchField.toLowerCase());
     });
 
-    return !Robots.length ? (
+    return isPending ? (
       <h1>Loading ...</h1>
     ) : (
       <div className="tc">
